@@ -1,57 +1,63 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- * @flow
- */
-
 import React, {Component} from 'react';
-import {Platform, StyleSheet, Text, View, Image} from 'react-native';
+import {Platform, StyleSheet, Text, View, Image, FlatList, ActivityIndicator} from 'react-native';
 
-const instructions = Platform.select({
-  ios: 'Press Cmd+R to reload,\n' + 'Cmd+D or shake for dev menu',
-  android:
-    'Double tap R on your keyboard to reload,\n' +
-    'Shake or press menu button for dev menus',
-});
-
-type Props = {};
 export default class App extends Component<Props> {
-  render() {
-    let pic = {
-      uri: 'https://upload.wikimedia.org/wikipedia/commons/d/de/Bananavarieties.jpg'
-    };
+  constructor(props) {
+    super(props)
+    this.state={ isLoading: true }
+  }
 
-    return (
-      <View style={styles.container}>
-        <Text style={styles.welcome}>Welcome to React Native!</Text>
-        <Text style={styles.red}>To get started, edit App.js</Text>
-        <Text style={styles.instructions}>{instructions}</Text>
-        <Image source={pic} style={{width: 193, height: 110}}/>
-      </View>
-    );
+  componentDidMount() {
+    return fetch('https://facebook.github.io/react-native/movies.json')
+    .then((response) => response.json())
+    .then((responseJson) => {
+      this.setState({
+        isLoading: false,
+        dataSource: responseJson.movies,
+      }, function(){
+
+      })
+      
+    })
+    .catch((error) =>{
+      console.log(error);
+    })
+  }
+
+  render() {
+    
+      if(this.state.isLoading){
+        return (
+          <View style={{flex: 1, padding: 20}}>
+            <ActivityIndicator />
+          </View>
+        )
+      }
+      
+      return (
+        <View style={styles.container}>
+          <Text style={styles.titulo}>PegaTrampo</Text>
+          <FlatList
+            data={this.state.dataSource}
+            renderItem={({item})=> <Text style={styles.item}>{item.title}, {item.releaseYear}</Text>}
+            keyExtractor={({id}, index) => id}
+          />
+        </View>
+      );
   }
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F5FCFF',
+    paddingTop: 22
   },
-  welcome: {
-    fontSize: 20,
-    textAlign: 'center',
-    margin: 10,
+  titulo: {
+    textAlign: 'center'
   },
-  instructions: {
-    textAlign: 'center',
-    color: '#333333',
-    marginBottom: 5,
-  },
-  red: {
-    color: 'red'
+  item: {
+    padding: 10,
+    fontSize: 18,
+    height: 44
   }
 });
